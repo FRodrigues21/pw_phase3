@@ -1,0 +1,575 @@
+{
+   "event_name":"Edinburgh Festival 2016",
+   "stories":[
+      {
+         "story_title":"Edinburgh Castle is one of the main attractions",
+         "story_id":1,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Deep time Show",
+               "image": "760513155030220800",
+               "keywords":"Deep time Show"
+            },
+            {
+               "segment_id":2,
+               "text":"Fireworks",
+               "image": "770382667279896580",
+               "keywords":"Fireworks"
+            },
+            {
+               "segment_id":3,
+               "text":"Beautiful streets of Edinburgh with its castle on the background",
+               "image": "766179905533083648",
+               "keywords":"Edinburgh streets and castle"
+            },
+            {
+               "segment_id":4,
+               "text":"People enjoying Edinburgh Castle clear blue sky",
+               "image": "769080926567534592",
+               "keywords":"People and Edinburgh Castle with blue sky"
+            }
+         ]
+      },
+      {
+         "story_title":"Street Performances",
+         "story_id":2,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"The Edinburgh Festival is home to one of the most unique celebrations of arts",
+               "image": "759764821415956480",
+               "keywords":"Celebrations of arts"
+            },
+            {
+               "segment_id":2,
+               "text":"Street circus is a popular attraction at Edinburgh Festival with several artists such as unicycle jugglers",
+               "image": "767762721433587713",
+               "keywords":"Street circus artists unicycle jugglers"
+            },
+            {
+               "segment_id":3,
+               "text":"Street circus is full of colorful artists",
+               "image": "816795436816089089",
+               "keywords":"Street circus and colorful artists"
+            },
+            {
+               "segment_id":4,
+               "text":"Bagpipes",
+               "image": "768479195232174080",
+               "keywords":"Bagpipes"
+            }
+         ]
+      },
+      {
+         "story_title":"Music shows",
+         "story_id":3,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Audiences at Edinburgh Festival music shows",
+               "image": "761962521238515714",
+               "keywords":"Audiences at music shows"
+            },
+            {
+               "segment_id":2,
+               "text":"Guitar on stage",
+               "image": "766657294033616897",
+               "keywords":"Guitar on stage"
+            },
+            {
+               "segment_id":3,
+               "text":"Band on stage",
+               "image": "767457574803402752",
+               "keywords":"Band on stage"
+            },
+            {
+               "segment_id":4,
+               "text":"Singer close-up",
+               "image": "779397178167025664",
+               "keywords":"Singer close-up"
+            }
+         ]
+      },
+      {
+         "story_title":"Edinburgh comedy awards 2016",
+         "story_id":4,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Eight comedy shows are in the running for the prestigious prize at the Edinburgh festival",
+               "image": "769844995251724288",
+               "keywords":"Prizes for comedy shows"
+            },
+            {
+               "segment_id":2,
+               "text":"James Acaster receiving a fifth consecutive nomination",
+               "image": "757176295881117697",
+               "keywords":"James Acaster receiving the fifth consecutive nomination"
+            },
+            {
+               "segment_id":3,
+               "text":"The most eye-catching nominee is the Fife comic Richard Gadd, overlooked for his extraordinary stunt-comedy show Waiting for Gaddot last year",
+               "image": "765128408653238272",
+               "keywords":"Fife comic Richard Gadd and his extraordinary stunt-comedy show Waiting for Gaddot last year"
+            },
+            {
+               "segment_id":4,
+               "text":"Completing a trio of Australians on the shortlist, Zoe Coombs Marr is the only female act nominated - and even she dressed as a man to get there",
+               "image": "768424658265714690",
+               "keywords":"Zoe Coombs Marr the only female act nominated dressed as a man"
+            }
+         ]
+      },
+      {
+         "story_title":"My first fringe: the Edinburgh baby shows getting gurgles of applause",
+         "story_id":5,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Full of costumes and musical magic, the fringe can cast a spell over most adults - but for the very young, it's a creative introduction to a whole new world",
+               "image": "811955462778318848",
+               "keywords":"Costumes, musicals and young children"
+            },
+            {
+               "segment_id":2,
+               "text":"The range and quality of shows for babies at the fringe is delightful",
+               "image": "763055657419431936",
+               "keywords":"Shows for babies"
+            },
+            {
+               "segment_id":3,
+               "text":"The Royal Botanic Gardens and its dreamy musical delights can be enjoyed by all families",
+               "image": "763695663712444416",
+               "keywords":"Royal Botanic Gardens families"
+            },
+            {
+               "segment_id":4,
+               "text":"Babies and kids at Edinburgh Festival",
+               "image": "763346158580277248",
+               "keywords":"Babies, kids and children"
+            }
+         ]
+      },
+      {
+         "story_title":"Comedy at Edinburgh Festival",
+         "story_id":6,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Edinburgh Festival is Full of Comedy Shows",
+               "image": "762045946524033024",
+               "keywords":"Comedy shows"
+            },
+            {
+               "segment_id":2,
+               "text":"A comedian and a microphone: Several Stand-up shows take place across festival's stages",
+               "image": "768779906679468032",
+               "keywords":"A comedian and a microphone on stage at stand-up show"
+            },
+            {
+               "segment_id":3,
+               "text":"Comedy crowds sometimes have the size of a football team",
+               "image": "761356646224392192",
+               "keywords":"Comedy shows crowds"
+            },
+            {
+               "segment_id":4,
+               "text":"The best joke award goes to Masai Graham's",
+               "image": "767983466822631424",
+               "keywords":"The best joke winner Masai Graham"
+            }
+         ]
+      },
+      {
+         "story_title":"Theatre at Edinburgh Festival",
+         "story_id":7,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Actors performing on Stage - Play",
+               "image": "782539888294002688",
+               "keywords":"Actors performing plays on stage"
+            },
+            {
+               "segment_id":2,
+               "text":"Edinburgh Festival has plenty of theatre shows",
+               "image": "782643319797116928",
+               "keywords":"Theatre shows"
+            },
+            {
+               "segment_id":3,
+               "text":"There's a bevy of Shakespeare-related shows at Edinburgh in the playwright's quadricentenary year",
+               "image": "764940194046967808",
+               "keywords":"Shakespeare shows"
+            },
+            {
+               "segment_id":4,
+               "text":"The Glass Menagerie - triumphant take on Tennessee Williams",
+               "image": "763747488335527936",
+               "keywords":"The Glass Menagerie and Tennessee Williams"
+            }
+         ]
+      },
+      {
+         "story_title":"Edinburgh Festival locations",
+         "story_id":8,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Edinburgh castle",
+               "image": "765986455512645632",
+               "keywords":"Edinburgh castle"
+            },
+            {
+               "segment_id":2,
+               "text":"Streets",
+               "image": "768781769185329152",
+               "keywords":"Streets"
+            },
+            {
+               "segment_id":3,
+               "text":"Stages",
+               "image": "762018037746790400",
+               "keywords":"Stages"
+            },
+            {
+               "segment_id":4,
+               "text":"Parks and woods",
+               "image": "771346556243046400",
+               "keywords":"Parks and woods"
+            }
+         ]
+      },
+      {
+         "story_title":"Gastronomy at Edinburgh Festival",
+         "story_id":9,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Pizzas",
+               "image": "765525038065917953",
+               "keywords":"Pizzas"
+            },
+            {
+               "segment_id":2,
+               "text":"Hamburgers",
+               "image": "764514663384178689",
+               "keywords":"Burgers"
+            },
+            {
+               "segment_id":3,
+               "text":"Desserts",
+               "image": "764845575124750338",
+               "keywords":"Desserts"
+            },
+            {
+               "segment_id":4,
+               "text":"Drinks",
+               "image": "764505870705229825",
+               "keywords":"Drinks"
+            }
+         ]
+      },
+      {
+         "story_title":"Scottish Elements",
+         "story_id":10,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Bagpipes",
+               "image": "803926880277696512",
+               "keywords":"Bagpipes"
+            },
+            {
+               "segment_id":2,
+               "text":"Food and drink",
+               "image": "760902643208351745",
+               "keywords":"Food and drink"
+            },
+            {
+               "segment_id":3,
+               "text":"Outfits",
+               "image": "779721093263351810",
+               "keywords":"Outfits"
+            },
+            {
+               "segment_id":4,
+               "text":"Military parade",
+               "image": "761480280033095680",
+               "keywords":"Military parade"
+            }
+         ]
+      },
+      {
+         "story_title":"Festival Themes",
+         "story_id":11,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"War and Migration",
+               "image": "765886220891222016",
+               "keywords":"War and Migration"
+            },
+            {
+               "segment_id":2,
+               "text":"Refugees emerge as a major theme in plays, talks and performances of Edinburgh Festival 2016",
+               "image": "761315302831423488",
+               "keywords":"Refugees"
+            },
+            {
+               "segment_id":3,
+               "text":"Technology",
+               "image": "760183470962409472",
+               "keywords":"Technology"
+            },
+            {
+               "segment_id":4,
+               "text":"Youth culture",
+               "image": "767159866259628032",
+               "keywords":"Youth culture"
+            }
+         ]
+      },
+      {
+         "story_title":"Social Side of the Festival",
+         "story_id":12,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Protests",
+               "image": "765970783013396481",
+               "keywords":"Protests"
+            },
+            {
+               "segment_id":2,
+               "text":"Woman in comedy",
+               "image": "765118138090487808",
+               "keywords":"Woman in comedy"
+            },
+            {
+               "segment_id":3,
+               "text":"Debates along the Festival",
+               "image": "784389939190439937",
+               "keywords":"Debates along the Festival"
+            }
+         ]
+      },
+      {
+         "story_title":"Concerts",
+         "story_id":13,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Orchestra",
+               "image": "765876896060076036",
+               "keywords":"Orchestra"
+            },
+            {
+               "segment_id":2,
+               "text":"Music Crowds Cheering",
+               "image": "764396046948700160",
+               "keywords":"Music Crowds Cheering"
+            },
+            {
+               "segment_id":3,
+               "text":"Stages and Concert Halls",
+               "image": "763742726147940356",
+               "keywords":"Stages and Concert Halls"
+            }
+         ]
+      },
+      {
+         "story_title":"Fashion at EdFest2016",
+         "story_id":14,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Costumes and Masquerades",
+               "image": "748039411158355969",
+               "keywords":"Costumes and Masquerades"
+            },
+            {
+               "segment_id":2,
+               "text":"Jewels, Hats and other Accessories",
+               "image": "764054915597545472",
+               "keywords":"Jewels, Hats and other Accessories"
+            },
+            {
+               "segment_id":3,
+               "text":"From casual to formal wear",
+               "image": "760394256821387264",
+               "keywords":"From casual to formal wear"
+            }
+         ]
+      },
+      {
+         "story_title":"Wide variety of Performers",
+         "story_id":15,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Rehearsals",
+               "image": "763438048440877056",
+               "keywords":"Rehearsals"
+            },
+            {
+               "segment_id":2,
+               "text":"Actors acting alongside",
+               "image": "803565532972716032",
+               "keywords":"Actors acting alongside"
+            },
+            {
+               "segment_id":3,
+               "text":"Jugglers entertaining Crowds on the streets",
+               "image": "765899617066164224",
+               "keywords":"Jugglers on the streets"
+            },
+            {
+               "segment_id":4,
+               "text":"All kind of music instruments being played at EdFest2016",
+               "image": "747396059681325056",
+               "keywords":"Music instruments"
+            }
+         ]
+      },
+      {
+         "story_title":"Press and Social Media Coverage",
+         "story_id":16,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Interviews",
+               "image": "762314466813939712",
+               "keywords":"Interviews"
+            },
+            {
+               "segment_id":2,
+               "text":"Posing alongside Artists and Performers",
+               "image": "763859564865396740",
+               "keywords":"Posing alongside Artists and Performers"
+            },
+            {
+               "segment_id":3,
+               "text":"Performers Posing / Cover Photos",
+               "image": "766770524349468672",
+               "keywords":"Performers Posing and Cover Photos"
+            }
+         ]
+      },
+      {
+         "story_title":"Joyful Moments at EdFest2016",
+         "story_id":17,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Standing Ovations and Applauses",
+               "image": "765975144779091968",
+               "keywords":"Ovations and Applauses"
+            },
+            {
+               "segment_id":2,
+               "text":"Selfies",
+               "image": "763690390763540481",
+               "keywords":"Selfies"
+            },
+            {
+               "segment_id":3,
+               "text":"People Drinking and Eating",
+               "image": "767126530229174273",
+               "keywords":"People Drinking and Eating"
+            },
+            {
+               "segment_id":4,
+               "text":"Evenings at EdFest2016",
+               "image": "768923131935330308",
+               "keywords":"Evenings"
+            }
+         ]
+      },
+      {
+         "story_title":"Dancing",
+         "story_id":18,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Solo Performance",
+               "image": "766322558690004992",
+               "keywords":"Solo Performance"
+            },
+            {
+               "segment_id":2,
+               "text":"Group Performance",
+               "image": "767798299441135617",
+               "keywords":"Group Performance"
+            },
+            {
+               "segment_id":3,
+               "text":"Cabaret and Musical",
+               "image": "765492578397593600",
+               "keywords":"Cabaret and Musical"
+            },
+            {
+               "segment_id":4,
+               "text":"Classical and Contemporary",
+               "image": "765111816905076737",
+               "keywords":"Classical and Contemporary"
+            }
+         ]
+      },
+      {
+         "story_title":"Backstage Moments",
+         "story_id":19,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Artists relaxing before performance",
+               "image": "769511930755158016",
+               "keywords":"Artists relaxing before performance"
+            },
+            {
+               "segment_id":2,
+               "text":"Group Photos and Selfies",
+               "image": "764181807751454720",
+               "keywords":"Group Photos and Selfies"
+            },
+            {
+               "segment_id":3,
+               "text":"Make-up and Dressing",
+               "image": "768810307716255744",
+               "keywords":"Make-up and Dressing"
+            }
+         ]
+      },
+      {
+         "story_title":"Edinburgh Festival attractions",
+         "story_id":20,
+         "segments":[
+            {
+               "segment_id":1,
+               "text":"Music shows",
+               "image": "763025354143465472",
+               "keywords":"Music shows"
+            },
+            {
+               "segment_id":2,
+               "text":"Theater and Comedy",
+               "image": "755485279293739009",
+               "keywords":"Theater and Comedy"
+            },
+            {
+               "segment_id":3,
+               "text":"Circus",
+               "image": "765919035649392640",
+               "keywords":"Circus"
+            },
+            {
+               "segment_id":4,
+               "text":"Street Performances",
+               "image": "767093479008772100",
+               "keywords":"Street Performances"
+            }
+         ]
+      }
+   ]
+}

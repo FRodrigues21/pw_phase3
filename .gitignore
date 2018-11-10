@@ -1,0 +1,5 @@
+images/
+.DS_STORE
+query_images/
+cropped_images/
+.ipynb_checkpoints
