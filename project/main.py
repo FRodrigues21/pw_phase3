@@ -11,6 +11,7 @@ from skimage.io import imread
 from sklearn.preprocessing import normalize
 from skimage import color
 from skimage import data, exposure
+import random
 from numpy.random import shuffle
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics import classification_report
@@ -29,7 +30,6 @@ from ws_toolkit.utils import center_crop_image, k_neighbours
 
 # Cached arrays
 #croppedImages = []
-
 
 def cropImageList(images):
     global croppedImages
@@ -120,17 +120,18 @@ targets = [list(map(int, c.replace(' ', '').split(","))) for c in data[2]]
 croppedImages = cropImageList(imageLinks)
 
 # %%
+rand_seed = random.randint(1,100)
 indices = np.arange(len(tweets))
-np.random.seed(3)
-np.random.shuffle(indices)
+np.random.seed(rand_seed)
+shuffle(indices)
 
 X = tweets
-np.random.seed(3)
-np.random.shuffle(X)
+np.random.seed(rand_seed)
+shuffle(X)
 
 y_target = targets
-np.random.seed(3)
-np.random.shuffle(y_target)
+np.random.seed(rand_seed)
+shuffle(y_target)
 
 total_images = X.shape[0]
 
