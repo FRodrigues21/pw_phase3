@@ -29,7 +29,7 @@ print(os.getcwd())
 from ws_toolkit.utils import center_crop_image, k_neighbours
 
 # Cached arrays
-#croppedImages = []
+croppedImages = []
 
 def cropImageList(images):
     global croppedImages
@@ -120,60 +120,68 @@ targets = [list(map(int, c.replace(' ', '').split(","))) for c in data[2]]
 croppedImages = cropImageList(imageLinks)
 
 # %%
-rand_seed = random.randint(1,100)
-indices = np.arange(len(tweets))
-np.random.seed(rand_seed)
-shuffle(indices)
+def runAll(iterations):
+    rand_seed = random.randint(1,100)
+    indices = np.arange(len(tweets))
+    np.random.seed(rand_seed)
+    shuffle(indices)
 
-X = tweets
-np.random.seed(rand_seed)
-shuffle(X)
+    X = tweets
+    np.random.seed(rand_seed)
+    shuffle(X)
 
-y_target = targets
-np.random.seed(rand_seed)
-shuffle(y_target)
+    y_target = targets
+    np.random.seed(rand_seed)
+    shuffle(y_target)
 
-total_images = X.shape[0]
+    total_images = X.shape[0]
 
-# Let's assume that 20% of the dataset is labeled
-labeled_set_size = int(total_images*0.2)
+    # Let's assume that 20% of the dataset is labeled
+    labeled_set_size = int(total_images*0.2)
 
-indices_labeled = indices[:labeled_set_size]
-indices_unlabeled = indices[labeled_set_size:]
+    indices_labeled = indices[:labeled_set_size]
+    indices_unlabeled = indices[labeled_set_size:]
 
-print("Total tweets labeled: {} - Total tweets unlabeled: {}".format(
-    len(indices_labeled), len(indices_unlabeled)))
+    print("Total tweets labeled: {} - Total tweets unlabeled: {}".format(
+        len(indices_labeled), len(indices_unlabeled)))
 
 
-# Convert labels to a one-hot-encoded vector
-# Keep groundtruth labels
-classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-# print(classes)
-mlb = MultiLabelBinarizer(classes=classes)
-Y_true = mlb.fit_transform(y_target)
-Y = mlb.transform(y_target)
+    # Convert labels to a one-hot-encoded vector
+    # Keep groundtruth labels
+    classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    # print(classes)
+    mlb = MultiLabelBinarizer(classes=classes)
+    Y_true = mlb.fit_transform(y_target)
+    Y = mlb.transform(y_target)
 
-# Remove labels of "unlabeled" data
-Y[indices_unlabeled, :] = np.zeros(Y.shape[1])
+    # Remove labels of "unlabeled" data
+    Y[indices_unlabeled, :] = np.zeros(Y.shape[1])
 
-# Run Algorithm and Get Results
-feature = "hog"
-alpha = 1
-num_iterations = 50
-sigma = 1
-Y = runAlg(mlb, croppedImages, Y, Y_true, feature=feature,
-           alpha=alpha, iterations=num_iterations, sigma=sigma)
+    # Run Algorithm and Get Results
+    feature = "hog"
+    alpha = 1 # weight of the feature (in this case will be 1 = 100%)
+    sigma = 1
+    Y = runAlg(mlb, croppedImages, Y, Y_true, feature=feature,
+            alpha=alpha, iterations=iterations, sigma=sigma)
 
-# Evaluation
-np.set_printoptions(threshold=np.nan)
-# Get the predictions of the unlabeled documents
-Y_pred = Y[indices_unlabeled, :]
-print(Y_pred[:10])
+    Y_pred = Y[indices_unlabeled, :]
+    y_gt = Y_true[indices_unlabeled, :]
+    return Y_pred, y_gt
 
-# Get the corresponding groundtruth
-y_gt = Y_true[indices_unlabeled, :]
-print(y_gt[:10])
+from sklearn.metrics import precision_recall_fscore_support as score
 
-print("\n\nRESULTS FOR: F: {} a: {} i: {} s: {}\n".format(
-    feature, alpha, num_iterations, sigma))
-print(classification_report(y_gt, Y_pred))
+results = np.zeros((49,4))
+range_iterations = range(10,500,10)
+j = 0
+
+for i in range_iterations:
+    Y_pred, y_gt = runAll(i)
+    precision, recall, fscore, support = score(y_gt, Y_pred, average='macro')
+    results[j] = [precision, recall, fscore, support]
+    j = j+1
+
+# %%
+import matplotlib.pyplot as plt
+plt.plot(range_iterations, results[:,0], 'r', range_iterations, results[:,1], 'b', range_iterations, results[:,2], 'g')
+
+print(results)
