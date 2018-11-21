@@ -15,8 +15,10 @@ import random
 from numpy.random import shuffle
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics import classification_report
+from skimage import img_as_ubyte
 import warnings
 import os
+from keras.preprocessing import image
 warnings.filterwarnings('ignore')
 
 print(os.getcwd(), "changing to:", os.getcwd()+"/../")
@@ -62,6 +64,27 @@ def features_hog(images, pixels_per_cell=(32, 32), orientations=8):
     gradientMatrix = np.array(gradientMatrix)
     return gradientMatrix
 
+def getColorMatrix(_croppedImages, _bins=(4,4,4), _hsv=True): 
+    colorMatrix = []
+    for img in _croppedImages:    
+        # Change image color space from RGB to HSV. 
+        # HSV color space was designed to more closely align with the way human vision perceive color-making attributes
+        img_q = img
+        if _hsv:
+            img_q = color.rgb2hsv(img)    
+        # convert image pixels to [0, 255] range, and to uint8 type
+        img_q = img_as_ubyte(img_q)
+        # Extract HoC features
+        hist, bin_edges = hoc(img_q, bins=_bins)    
+        # Normalize features
+        # We add 1 dimension to comply with scikit-learn API
+        hist = np.squeeze(normalize(hist.reshape(1, -1), norm="l2"))    
+        colorMatrix.append(hist)    
+    # Creating a feature matrix for all images
+    colorMatrix = np.array(colorMatrix)
+    return colorMatrix
+
+
 
 def runAlg(mlb, images, y, y_true, feature, alpha, iterations, sigma, params=None):
     # Step 1 - Extract features for each image (HoG/CNN/HoC) in X
@@ -69,39 +92,44 @@ def runAlg(mlb, images, y, y_true, feature, alpha, iterations, sigma, params=Non
         pixels_per_cell = (32, 32)
         orientations = 8
         X = features_hog(images, pixels_per_cell, orientations)
-        # Step 2 - Initialize matrix F with Y
-        F = y
-
-        # Step 3 - Compute matrix W
-        from sklearn.metrics.pairwise import euclidean_distances
-        W = np.exp(-1*euclidean_distances(X, X)/(2*sigma**2))
-
-        # Step 4 - Normalize W
-        D = np.zeros(W.shape)
-        np.fill_diagonal(D, W.sum(axis=0))
-
-        D12 = np.zeros(D.shape)
-        from numpy.linalg import inv
-        D12 = inv(np.sqrt(D))
-
-        S = np.dot(D12, W)
-        S = np.dot(S, D12)
-
-        # Step 5 - Perform the F update step num_iterations steps
-        for i in range(1, iterations):
-            T1 = alpha * S
-            T1 = np.dot(T1, F)
-            T2 = 1 * alpha * y_true
-            F = T1 + T2
-        # Select top k classes
-        F = np.fliplr(np.argsort(F, axis=1))
-        # Get the top 5 only classes
-        F = F[:,:5]
-        Y = mlb.transform(F)
-        return Y
     else:
-        print("No feature selected")
-        return []
+        bins = (4,4,4)
+        hsv = True
+        X = getColorMatrix(images, bins, hsv)
+        
+    # Step 2 - Initialize matrix F with Y
+    F = y
+
+    # Step 3 - Compute matrix W
+    from sklearn.metrics.pairwise import euclidean_distances
+    W = np.exp(-1*euclidean_distances(X, X)/(2*sigma**2))
+
+    # Step 4 - Normalize W
+    D = np.zeros(W.shape)
+    np.fill_diagonal(D, W.sum(axis=0))
+
+    D12 = np.zeros(D.shape)
+    from numpy.linalg import inv
+    D12 = inv(np.sqrt(D))
+
+    S = np.dot(D12, W)
+    S = np.dot(S, D12)
+
+    # Step 5 - Perform the F update step num_iterations steps
+    for i in range(1, iterations):
+        T1 = alpha * S
+        T1 = np.dot(T1, F)
+        T2 = 1 * alpha * y_true
+        F = T1 + T2
+    # Select top k classes
+    F = np.fliplr(np.argsort(F, axis=1))
+    # Get the top 5 only classes
+    F = F[:,:5]
+    Y = mlb.transform(F)
+    return Y
+   
+
+
 
 
 # Read dataset .csv
