@@ -3,3 +3,4 @@ images/
 query_images/
 cropped_images/
 .ipynb_checkpoints
+ws_toolkit/__pycache__/
