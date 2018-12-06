@@ -1,43 +1,24 @@
-#%%
-from skimage.transform import resize
-from sklearn.metrics import pairwise_distances
-from skimage import color
-from keras.preprocessing import image
+# %%
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
 import nltk
-nltk.download('wordnet')
+import time
 from nltk.stem import WordNetLemmatizer
+from sklearn.metrics import pairwise_distances
 from sklearn.preprocessing import normalize
-from keras.applications.vgg16 import VGG16
-from keras.applications.vgg16 import preprocess_input, decode_predictions
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import normalize
+from sklearn.preprocessing import MultiLabelBinarizer
+from skimage import color
 from skimage.io import imread
 from skimage.color import rgb2gray
 from skimage.feature import hog
-from tokenizer import tokenizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import euclidean_distances
-import matplotlib.pyplot as plt
-import numpy as np
-from numpy import linalg as LA
-import pandas as pd
-from sklearn.preprocessing import normalize
-from skimage import color
-from skimage import data, exposure
-from sklearn.metrics import precision_recall_fscore_support as score
-import matplotlib.pyplot as plt
-import sys
-import random
-from numpy.random import shuffle
-from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.metrics import classification_report
+from skimage.transform import resize
 from skimage import img_as_ubyte
-import warnings
-import os
-import time
+from tokenizer import tokenizer
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras.preprocessing import image
+nltk.download('wordnet')
 
 def center_crop_image(im, size=224):
     if len(im.shape) >= 3 and im.shape[2] == 4: # Remove the alpha channel when present

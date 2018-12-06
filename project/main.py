@@ -1,34 +1,31 @@
-#%%
-import os.path
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from tokenizer import tokenizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import euclidean_distances
-import matplotlib.pyplot as plt
-import numpy as np
-from numpy import linalg as LA
-import pandas as pd
-from sklearn.preprocessing import normalize
-from skimage import color
-from skimage import data, exposure
-from sklearn.metrics import precision_recall_fscore_support as score
-import matplotlib.pyplot as plt
-import sys
-import random
-from numpy.random import shuffle
-from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.metrics import classification_report
-from skimage import img_as_ubyte
+# %%
 import warnings
 import os
 import time
+import sys
+import random
+import pandas as pd
+import numpy as np
+from numpy import linalg as LA
+from numpy.random import shuffle
+from tokenizer import tokenizer
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.metrics import classification_report
+from sklearn.preprocessing import normalize
+from sklearn.preprocessing import MultiLabelBinarizer
+from skimage import color, data, exposure
+from skimage import img_as_ubyte
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras.preprocessing import image
 
 warnings.filterwarnings('ignore')
+
+os.chdir("/Users/franciscorodrigues/Projects/PW/pw_phase3")
+print("Current path: {}".format(os.getcwd()))
 
 from ws_toolkit.utils import *
 
@@ -85,13 +82,13 @@ croppedImages = cropImageList(croppedImages, imageLinks)
 # Cache features
 computeFeatures()
 
+#%%
 
-def runAlg(mlb, images, y, y_true, features, weights, selection, topk, threshold, alpha, iterations, params=None, indices_unlabeled=[]):
+def label_propagation(mlb, images, y, y_true, features, weights, selection, topk, threshold, alpha, iterations, params=None, indices_unlabeled=[]):
 
     # Step 2 - Normalize Y and Initialize matrix F with Y
     Y_hidden = normalize(y, axis=1, norm="l1")
     F = Y_hidden
-    # print(F[indices_labeled[0],:])
 
     # Step 3 - Compute matrix W (multi feature -mf true; or single feature -mf
     # false)
@@ -100,10 +97,9 @@ def runAlg(mlb, images, y, y_true, features, weights, selection, topk, threshold
     print("Features: {}".format(len(features)))
     if(len(features) == 1):
         weights[0] = 1
-    print(weights[0])
+
     for i in range(len(features)):
         M += weights[i] * euclidean_distances(features[i], features[i])
-    #M = weights[0]*euclidean_distances(feature[0], feature[0]) + weights[1]*euclidean_distances(feature[1], feature[1])
 
     sigma = np.std(M)
     W = np.exp(-1 * M / (2 * sigma**2))
@@ -144,7 +140,7 @@ def runAlg(mlb, images, y, y_true, features, weights, selection, topk, threshold
     return Y
 
 
-def runAll(iterations, p, features, weights, alpha, selection, topk, threshold):
+def iteration_lb(iterations, p, features, weights, alpha, selection, topk, threshold):
     # Choose a random number between 1 and 100 to shuffle to prevent biased
     # results
     rand_seed = random.randint(1, 100)
@@ -185,8 +181,8 @@ def runAll(iterations, p, features, weights, alpha, selection, topk, threshold):
     Y[indices_unlabeled, :] = np.zeros(Y.shape[1])
 
     # Run Algorithm and Get Results
-    Y = runAlg(mlb, croppedImages, Y, Y_true, features=features, weights=weights, selection=selection, topk=topk, threshold=threshold,
-               alpha=alpha, iterations=iterations, indices_unlabeled=indices_unlabeled)
+    Y = label_propagation(mlb, croppedImages, Y, Y_true, features=features, weights=weights, selection=selection, topk=topk, threshold=threshold,
+                          alpha=alpha, iterations=iterations, indices_unlabeled=indices_unlabeled)
 
     Y_pred = Y[indices_unlabeled, :]
     y_gt = Y_true[indices_unlabeled, :]
@@ -196,25 +192,27 @@ def runAll(iterations, p, features, weights, alpha, selection, topk, threshold):
 
     return Y_pred, y_gt
 
+# %%
+
 results = np.zeros((10, 4))
 range_iterations = range(10, 500, 50)
 j = 0
 
 # Variable params
-p = 0.7
+p = 0.5
 # Possible X_HOG, X_HOG, X_BOW, X_CNN -> If mf=False use only one feature
 # inside the array
-features = [X_BOW, X_CNN]
+features = [X_BOW]
 # Sum must be one - and must always be filled even if mf=False
-weights = [0.5, 0.5]
-alpha = 0.8
+weights = [0.4, 0.6]
+alpha = 0.2
 selection = False  # False - Top K | True - Threshold
 topk = 3
-threshold = 0.15
+threshold = 0.07
 
 for i in range_iterations:
-    Y_pred, y_gt = runAll(i, p, features, weights, alpha,
-                          selection, topk, threshold)
+    Y_pred, y_gt = iteration_lb(i, p, features, weights, alpha,
+                                selection, topk, threshold)
     precision, recall, fscore, support = score(y_gt, Y_pred, average='macro')
     results[j] = [precision, recall, fscore, support]
     j = j + 1
@@ -232,8 +230,8 @@ labels = ['precision', 'recall', 'f-score']
 
 for i in range(3):
     plt.plot(range_iterations, results[:, i], colors[i], label=labels[i])
+
 plt.xlabel("Iterations")
 plt.ylabel("Values")
 plt.legend(loc='best')
 plt.show()
-#plt.plot(range_iterations, results[:,0], 'r', range_iterations, results[:,1], 'b', range_iterations, results[:,2], 'g')
