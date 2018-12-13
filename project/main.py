@@ -8,8 +8,10 @@ print("Current path: {}".format(os.getcwd()))
 import time
 import sys
 import random
+import pprint
 import pandas as pd
 import numpy as np
+from dateutil.parser import parse
 from numpy import linalg as LA
 from numpy.random import shuffle
 from tokenizer import tokenizer
@@ -67,60 +69,27 @@ df = pd.read_csv("./visualstories_edfest_2016_twitter_xmedia.csv",
                  sep=';', encoding="utf-8")
 
 data = np.array([df.get("text").values, df.get(
-    "image-url").values, df.get("gt_class").values])
+    "image-url").values, df.get("gt_class").values, df.get("created_at")])
 # This are the text of the tweets
 tweets = data[0]
 # This are the links of the images of the tweets (ex: C0zsADasd213.jpg)
 imageLinks = [i.replace('https://pbs.twimg.com/media/', '') for i in data[1]]
 # This are the arrays of the data of each cropped image
 targets = [list(map(int, c.replace(' ', '').split(","))) for c in data[2]]
+# Get all the individual tweet dates and unique days dates
+dates = pd.to_datetime(df["created_at"])
+unique_dates = pd.to_datetime(df["created_at"]).dt.normalize().unique()
 # Save cropped images in cache
 croppedImages = bundle_crop(croppedImages, imageLinks, 224)
 
 # Cache features
 computeFeatures()
 
-# %%
+# PHASE 3
+# TFIDF by days using the query
+vectorizer = CountVectorizer(stop_words='english')
+for text in tweets:
+    tf = vectorizer.fit_transform([text])
+    print(list(zip(vectorizer.get_feature_names(), np.ravel(tf.sum(axis=0)))))
 
-results = np.zeros((10, 4))
-range_iterations = range(10, 500, 50)
-j = 0
-
-# Variable params
-classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-p = 0.5
-# Possible X_HOG, X_HOG, X_BOW, X_CNN -> If mf=False use only one feature
-# inside the array
-features = [X_BOW, X_CNN]
-# Sum must be one - and must always be filled even if mf=False
-weights = [0.6, 0.4]
-alpha = 0.2
-selection = False  # False - Top K | True - Threshold
-topk = 3
-threshold = 0.07
-
-for i in range_iterations:
-    Y_pred, y_gt = iteration_lb(tweets, targets, classes, i, p, features, weights, alpha,
-                                selection, topk, threshold)
-    precision, recall, fscore, support = score(y_gt, Y_pred, average='macro')
-    results[j] = [precision, recall, fscore, support]
-    j = j + 1
-
-from sklearn.metrics import classification_report
-np.set_printoptions(threshold=np.nan)
-
-print("\nResults List:    \n{}".format(results))
-print("\nResults Report:  \n{}".format(classification_report(y_gt, Y_pred)))
-
-print("\nResults Graph:   \n")
-
-colors = ['r', 'b', 'g']
-labels = ['precision', 'recall', 'f-score']
-
-for i in range(3):
-    plt.plot(range_iterations, results[:, i], colors[i], label=labels[i])
-
-plt.xlabel("Iterations")
-plt.ylabel("Values")
-plt.legend(loc='best')
-plt.show()
+# Sort by TFIDF value, and get top-k days
