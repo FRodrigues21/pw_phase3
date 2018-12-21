@@ -95,10 +95,67 @@ computeFeatures()
     4. Sort documents - array a) - by rank fusion score
 """
 # %%
-print(search_bow(X_BOW, X_BOW_VEC, "Castle", 200))
-print(search_hoc(X_HOC, "770382667279896580.jpg", 200))
-print(search_hog(X_HOG, "770382667279896580.jpg", 200))
-print(search_cnn(CNN_MODEL, CNN_MLB, CNN_TAGS, "770382667279896580.jpg", 200))
+elements = 2000
+results_bow = search_bow(X_BOW, X_BOW_VEC, "The Event Edinburgh Castle", elements)
+results_hoc = search_hoc(X_HOC, "760513155030220800.jpg", elements)
+results_hog = search_hog(X_HOG, "760513155030220800.jpg", elements)
+results_cnn = search_cnn(CNN_MODEL, CNN_MLB, CNN_TAGS,
+                         "760513155030220800.jpg", elements)
+
+results = [results_bow, results_cnn, results_hoc, results_hog]
+
+# COMBSUM
+print("\n--- COMBSUM RESULTS ---\n")
+combsum = []
+for doc_id in range(0, elements):
+    sum = 0
+    for s in range(0, len(results)):
+        try:
+            doc, score, position = next((doc, score, position) for (
+                doc, score, position) in results[s] if doc == doc_id)
+            sum += score
+        # When document not found (only for tops I guess)
+        except StopIteration:
+            sum += 0
+    combsum.append((doc_id, imageLinks[doc_id], sum))
+print(sorted(combsum, key=lambda s: s[2], reverse=True))
+
+# COMBMNZ
+print("\n--- COMBMNZ RESULTS ---\n")
+top = 5
+combmnz = []
+for doc_id in range(0, 2000):
+    sum = 0
+    cnt = 0
+    for s in range(0, len(results)):
+        try:
+            doc, score, position = next((doc, score, position) for (
+                doc, score, position) in results[s] if doc == doc_id)
+            sum += score
+            if position <= top:
+                cnt += 1
+        # When document not found (only for tops I guess)
+        except StopIteration:
+            sum += 0
+    combmnz.append((doc_id, imageLinks[doc_id], cnt * sum))
+print(sorted(combmnz, key=lambda s: s[2], reverse=True))
+
+# POSITION BASED
+# BORDA-FUSE
+print("\n--- BORDAFUSE RESULTS ---\n")
+bordafuse = []
+for doc_id in range(0, elements):
+    sum = 0
+    for s in range(0, len(results)):
+        try:
+            doc, score, position = next((doc, score, position) for (
+                doc, score, position) in results[s] if doc == doc_id)
+            sum += elements - position
+        # When document not found (only for tops I guess)
+        except StopIteration:
+            sum += elements + 1
+    bordafuse.append((doc_id, imageLinks[doc_id], sum))
+print(sorted(bordafuse, key=lambda s: s[2], reverse=True))
 
 
 # Parse query news topics/segments

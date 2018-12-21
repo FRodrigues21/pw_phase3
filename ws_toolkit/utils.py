@@ -124,7 +124,7 @@ def extract_features_hoc(_queryImageId, _bins=(4,4,4)):
 def search_hoc(data_features, image_id, n_elements):
     query_features = extract_features_hoc(image_id)
     k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes, k_nearest_dists))
+    results = list(zip(k_nearest_indexes, k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes))))
     return results
 
 # Histogram of Gradients
@@ -157,7 +157,7 @@ def extract_features_hog(_queryImageId, _pixelsPerCell=(32,32), _orientations=8)
 def search_hog(data_features, image_id, n_elements):
     query_features = extract_features_hog(image_id)
     k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes, k_nearest_dists))
+    results = list(zip(k_nearest_indexes, k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes))))
     return results
 
 # Bag of Words
@@ -201,7 +201,7 @@ def features_bow(X_BOW, _dataTexts, _lemmatize=False, _mdf=3, _metric="cosine", 
 def search_bow(texts_bow, texts_vec, query_text, n_elements=10):
     query_bow = bow_query(texts_vec, query_text)
     k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_bow, X=texts_bow, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes, k_nearest_dists))
+    results = list(zip(k_nearest_indexes, k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes)) ))
     return results
 
 # CNN - VGG 16
@@ -273,7 +273,7 @@ def extract_features_cnn(_queryImageId, _model, _mlb, _k=10):
 def search_cnn(data_model, data_mlb, data_features, image_id, n_elements=10):
     query_features, query_tags = extract_features_cnn(image_id, data_model, data_mlb)
     k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes,k_nearest_dists))
+    results = list(zip(k_nearest_indexes,k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes)) ))
     return results
 
 
