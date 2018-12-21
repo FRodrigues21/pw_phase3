@@ -112,8 +112,22 @@ def features_hoc(X_HOC, _croppedImages, _bins=(4, 4, 4), _hsv=True):
         X_HOC = np.array(X_HOC)
     return X_HOC
 
-# Histogram of Gradients
+def extract_features_hoc(_queryImageId, _bins=(4,4,4)):
+    img_q = imread("./query_images/" + _queryImageId)
+    img_q_hsv = center_crop_image(img_q, size=224)
+    img_q_hsv = color.rgb2hsv(img_q_hsv)
+    img_int = img_as_ubyte(img_q_hsv)
+    hist, bin_edges = hoc(img_int, bins=_bins)
+    image_q_feat = np.squeeze(normalize(hist.reshape(1, -1), norm="l2"))
+    return image_q_feat.reshape(1,-1)
 
+def search_hoc(data_features, image_id, n_elements):
+    query_features = extract_features_hoc(image_id)
+    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists))
+    return results
+
+# Histogram of Gradients
 
 def features_hog(X_HOG, images, pixels_per_cell=(32, 32), orientations=8):
     if X_HOG is None:
@@ -132,6 +146,20 @@ def features_hog(X_HOG, images, pixels_per_cell=(32, 32), orientations=8):
         X_HOG = np.array(X_HOG)
     return X_HOG
 
+def extract_features_hog(_queryImageId, _pixelsPerCell=(32,32), _orientations=8):
+    img_q = imread("./query_images/" + _queryImageId)
+    img_q = center_crop_image(img_q, size=224)
+    img_q = rgb2gray(img_q)
+    hist = hog(img_q, orientations=_orientations, pixels_per_cell=_pixelsPerCell)
+    image_q_feat = np.squeeze(normalize(hist.reshape(1, -1), norm="l2"))
+    return image_q_feat.reshape(1,-1)
+
+def search_hog(data_features, image_id, n_elements):
+    query_features = extract_features_hog(image_id)
+    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists))
+    return results
+
 # Bag of Words
 
 
@@ -144,6 +172,12 @@ def tokenizer_bow(sentence, tknzr, lemmatize=False):
     else:
         tokens = tknzr.tokenize(sentence)
     return tokens
+
+def bow_query(vectorizer, query):
+    # Transform query in a BoW representation
+    query_bow = vectorizer.transform([query])
+    query_bow = normalize(query_bow, norm="l2")   
+    return query_bow
 
 
 def init_bow(texts, args, mdf):
@@ -160,9 +194,15 @@ def features_bow(X_BOW, _dataTexts, _lemmatize=False, _mdf=3, _metric="cosine", 
     if X_BOW is None:
         tknzr = tokenizer.TweetTokenizer(
             preserve_handles=_handles, preserve_hashes=_hashes, preserve_case=_case, preserve_url=_url)
-        vectorizer, X_BOW = init_bow(
+        X_BOW_VEC, X_BOW = init_bow(
             _dataTexts, {"tknzr": tknzr, "lemmatize": _lemmatize}, _mdf)
-    return X_BOW
+    return X_BOW, X_BOW_VEC
+
+def search_bow(texts_bow, texts_vec, query_text, n_elements=10):
+    query_bow = bow_query(texts_vec, query_text)
+    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_bow, X=texts_bow, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists))
+    return results
 
 # CNN - VGG 16
 
@@ -217,7 +257,25 @@ def features_cnn(X_CNN, CNN_PREDICTIONS, images_path, _dataImages):
     mlb = MultiLabelBinarizer(classes=range(0, 1000))
     X_CNN = mlb.fit_transform(sorted_concepts)
     # print(tags_bow.shape)
-    return X_CNN, CNN_PREDICTIONS
+    # model, concepts, mlb, tags_bow, predictions
+    return model, concepts, mlb, X_CNN, CNN_PREDICTIONS 
+
+def extract_features_cnn(_queryImageId, _model, _mlb, _k=10):
+    print("Query", _queryImageId)
+    query_list = process_images_keras([_queryImageId], "./query_images/")
+    query_array_list = np.vstack(query_list)
+    pred_query = _model.predict(query_array_list)
+    query_sorted_concepts = np.argsort(pred_query, axis=1)[:,::-1][:,:_k]
+    query_bow = _mlb.transform(query_sorted_concepts)
+    query_tags = decode_predictions(pred_query, top=5)
+    return query_bow, query_tags
+
+def search_cnn(data_model, data_mlb, data_features, image_id, n_elements=10):
+    query_features, query_tags = extract_features_cnn(image_id, data_model, data_mlb)
+    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes,k_nearest_dists))
+    return results
+
 
 # Label Propagation
 
@@ -323,3 +381,45 @@ def iteration_lb(data, targets, classes, iterations, p, features, weights, alpha
     print("Predicted:    {}".format(Y[indices_unlabeled[0], :]))
 
     return Y_pred, y_gt
+
+# Rank Fusion
+
+# CombSUM
+# Input: Arrays of scores (4)
+# Output: Array of document indexes sorted descending by final combSum score
+def combSum(bow_results, hoc_results, hog_results, cnn_results):
+    results = np.zeros(bow_results.shape)
+    for i in range(len(results)):
+        results[i] = bow_results[i] + hoc_results[i] + hog_results[i] + cnn_results[i]
+    return np.flip(np.argsort(results))
+
+# CombMNZ
+# Input: Arrays of scores (4) AND Array of Top Doc Indexes
+# Output: Array of document indexes sorted descending by final combMNZ score
+def combMNZ(bow_results, hoc_results, hog_results, cnn_results, tops):
+    results = np.zeros(bow_results.shape)
+    for i in range(len(results)):
+        r = 0
+        for j in range(0, 4):
+            if(np.isin(i, tops[j])):
+                r+=1
+        print("Index: {} _ R: {} ".format(i, r))
+        results[i] = r * (bow_results[i] + hoc_results[i] + hog_results[i] + cnn_results[i])
+    return np.flip(np.argsort(results))
+
+tops = np.array([[1,2], [3,0], [4,3], [0,3]])
+
+x = np.array([0.1, 0.5, 0.04, 0.1, 0.5])
+y = np.array([0.4, 0.1, 0.1, 0.8, 0.1])
+w = np.array([0, 0.1, 0.1, 0.3, 0.9])
+z = np.array([0.5, 0.5, 0.1, 0.3, 0.5])
+
+print(combSum(x,y,w,z))
+
+print(combMNZ(x,y,w,z,tops))
+
+
+
+
+
+

@@ -32,12 +32,17 @@ croppedImages = []
 X_HOC = None
 X_HOG = None
 X_BOW = None
-X_CNN = None
+X_BOW_VEC = None
+CNN = None
+CNN_MODEL = None
+CNN_CONCEPTS = None
+CNN_MLB = None
+CNN_TAGS = None
 CNN_PREDICTIONS = []
 
 
 def computeFeatures():
-    global X_BOW, X_HOG, X_CNN, X_HOC, CNN_PREDICTIONS
+    global X_BOW, X_BOW_VEC, X_HOG, X_HOC, CNN_MODEL, CNN_CONCEPTS, CNN_MLB, CNN_TAGS, CNN_PREDICTIONS
     pixels_per_cell = (32, 32)
     orientations = 8
 
@@ -55,10 +60,10 @@ def computeFeatures():
 
     X_HOG = features_hog(X_HOG, croppedImages, pixels_per_cell, orientations)
     X_HOC = features_hoc(X_HOC, croppedImages, bins, hsv)
-    X_BOW = features_bow(X_BOW, tweets, _lemmatize, _mdf,
-                         _metric, _k, _handles, _hashes, _case, _url)
-    X_CNN, CNN_PREDICTIONS = features_cnn(
-        X_CNN, CNN_PREDICTIONS, "./images/", imageLinks)
+    X_BOW, X_BOW_VEC = features_bow(X_BOW, tweets, _lemmatize, _mdf,
+                                    _metric, _k, _handles, _hashes, _case, _url)
+    CNN_MODEL, CNN_CONCEPTS, CNN_MLB, CNN_TAGS, CNN_PREDICTIONS = features_cnn(
+        CNN, CNN_PREDICTIONS, "./images/", imageLinks)
 
 #%%
 
@@ -80,47 +85,20 @@ croppedImages = bundle_crop(croppedImages, imageLinks, 224)
 # Cache features
 computeFeatures()
 
+# Rank Fusion
+"""
+1. For each query perform search in
+    2. Each search space (BoW, HoC, HoG, CNN):
+        - Save each search space scores in a list
+    3. Apply each rank fusion method
+        a) Save final score in array
+    4. Sort documents - array a) - by rank fusion score
+"""
 # %%
+print(search_bow(X_BOW, X_BOW_VEC, "Castle", 200))
+print(search_hoc(X_HOC, "770382667279896580.jpg", 200))
+print(search_hog(X_HOG, "770382667279896580.jpg", 200))
+print(search_cnn(CNN_MODEL, CNN_MLB, CNN_TAGS, "770382667279896580.jpg", 200))
 
-results = np.zeros((10, 4))
-range_iterations = range(10, 500, 50)
-j = 0
 
-# Variable params
-classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-p = 0.5
-# Possible X_HOG, X_HOG, X_BOW, X_CNN -> If mf=False use only one feature
-# inside the array
-features = [X_BOW, X_CNN]
-# Sum must be one - and must always be filled even if mf=False
-weights = [0.6, 0.4]
-alpha = 0.2
-selection = False  # False - Top K | True - Threshold
-topk = 3
-threshold = 0.07
-
-for i in range_iterations:
-    Y_pred, y_gt = iteration_lb(tweets, targets, classes, i, p, features, weights, alpha,
-                                selection, topk, threshold)
-    precision, recall, fscore, support = score(y_gt, Y_pred, average='macro')
-    results[j] = [precision, recall, fscore, support]
-    j = j + 1
-
-from sklearn.metrics import classification_report
-np.set_printoptions(threshold=np.nan)
-
-print("\nResults List:    \n{}".format(results))
-print("\nResults Report:  \n{}".format(classification_report(y_gt, Y_pred)))
-
-print("\nResults Graph:   \n")
-
-colors = ['r', 'b', 'g']
-labels = ['precision', 'recall', 'f-score']
-
-for i in range(3):
-    plt.plot(range_iterations, results[:, i], colors[i], label=labels[i])
-
-plt.xlabel("Iterations")
-plt.ylabel("Values")
-plt.legend(loc='best')
-plt.show()
+# Parse query news topics/segments
