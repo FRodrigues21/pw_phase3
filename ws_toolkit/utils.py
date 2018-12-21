@@ -385,38 +385,55 @@ def iteration_lb(data, targets, classes, iterations, p, features, weights, alpha
 # Rank Fusion
 
 # CombSUM
-# Input: Arrays of scores (4)
-# Output: Array of document indexes sorted descending by final combSum score
-def combSum(bow_results, hoc_results, hog_results, cnn_results):
-    results = np.zeros(bow_results.shape)
-    for i in range(len(results)):
-        results[i] = bow_results[i] + hoc_results[i] + hog_results[i] + cnn_results[i]
-    return np.flip(np.argsort(results))
+def combSum(search_results, elements):
+    combsum = []
+    for doc_id in range(0, elements):
+        sum = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += score
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += 0
+        combsum.append((doc_id, imageLinks[doc_id], sum))
+    return sorted(combsum, key=lambda s: s[2])
 
 # CombMNZ
-# Input: Arrays of scores (4) AND Array of Top Doc Indexes
-# Output: Array of document indexes sorted descending by final combMNZ score
-def combMNZ(bow_results, hoc_results, hog_results, cnn_results, tops):
-    results = np.zeros(bow_results.shape)
-    for i in range(len(results)):
-        r = 0
-        for j in range(0, 4):
-            if(np.isin(i, tops[j])):
-                r+=1
-        print("Index: {} _ R: {} ".format(i, r))
-        results[i] = r * (bow_results[i] + hoc_results[i] + hog_results[i] + cnn_results[i])
-    return np.flip(np.argsort(results))
+def combMNZ(search_results, elements, top):
+    combmnz = []
+    for doc_id in range(0, 2000):
+        sum = 0
+        cnt = 0
+        for s in range(0, len(results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in results[s] if doc == doc_id)
+                sum += score
+                if position <= top:
+                    cnt += 1
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += 0
+        combmnz.append((doc_id, imageLinks[doc_id], cnt * sum))
+    return sorted(combmnz, key=lambda s: s[2], reverse=True)
 
-tops = np.array([[1,2], [3,0], [4,3], [0,3]])
-
-x = np.array([0.1, 0.5, 0.04, 0.1, 0.5])
-y = np.array([0.4, 0.1, 0.1, 0.8, 0.1])
-w = np.array([0, 0.1, 0.1, 0.3, 0.9])
-z = np.array([0.5, 0.5, 0.1, 0.3, 0.5])
-
-print(combSum(x,y,w,z))
-
-print(combMNZ(x,y,w,z,tops))
+# Borda Fuse
+def bordaFuse(search_results, elements):
+    bordafuse = []
+    for doc_id in range(0, elements):
+        sum = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += elements - position
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += elements + 1
+        bordafuse.append((doc_id, imageLinks[doc_id], sum))
+    return sorted(bordafuse, key=lambda s: s[2], reverse=True)
 
 
 

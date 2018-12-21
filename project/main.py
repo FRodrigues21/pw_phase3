@@ -25,8 +25,9 @@ from skimage import img_as_ubyte
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras.preprocessing import image
+# %% 
 import ws_toolkit.utils
-
+# %%
 # Cached arrays
 croppedImages = []
 X_HOC = None
@@ -86,14 +87,6 @@ croppedImages = bundle_crop(croppedImages, imageLinks, 224)
 computeFeatures()
 
 # Rank Fusion
-"""
-1. For each query perform search in
-    2. Each search space (BoW, HoC, HoG, CNN):
-        - Save each search space scores in a list
-    3. Apply each rank fusion method
-        a) Save final score in array
-    4. Sort documents - array a) - by rank fusion score
-"""
 # %%
 elements = 2000
 results_bow = search_bow(X_BOW, X_BOW_VEC, "The Event Edinburgh Castle", elements)
@@ -102,60 +95,21 @@ results_hog = search_hog(X_HOG, "760513155030220800.jpg", elements)
 results_cnn = search_cnn(CNN_MODEL, CNN_MLB, CNN_TAGS,
                          "760513155030220800.jpg", elements)
 
-results = [results_bow, results_cnn, results_hoc, results_hog]
+search_results = [results_bow, results_hoc, results_hog, results_cnn]
 
 # COMBSUM
 print("\n--- COMBSUM RESULTS ---\n")
-combsum = []
-for doc_id in range(0, elements):
-    sum = 0
-    for s in range(0, len(results)):
-        try:
-            doc, score, position = next((doc, score, position) for (
-                doc, score, position) in results[s] if doc == doc_id)
-            sum += score
-        # When document not found (only for tops I guess)
-        except StopIteration:
-            sum += 0
-    combsum.append((doc_id, imageLinks[doc_id], sum))
-print(sorted(combsum, key=lambda s: s[2], reverse=True))
+print(combSum(search_results, elements))
 
 # COMBMNZ
 print("\n--- COMBMNZ RESULTS ---\n")
 top = 5
-combmnz = []
-for doc_id in range(0, 2000):
-    sum = 0
-    cnt = 0
-    for s in range(0, len(results)):
-        try:
-            doc, score, position = next((doc, score, position) for (
-                doc, score, position) in results[s] if doc == doc_id)
-            sum += score
-            if position <= top:
-                cnt += 1
-        # When document not found (only for tops I guess)
-        except StopIteration:
-            sum += 0
-    combmnz.append((doc_id, imageLinks[doc_id], cnt * sum))
-print(sorted(combmnz, key=lambda s: s[2], reverse=True))
+print(combMNZ(search_results, elements, top))
 
 # POSITION BASED
 # BORDA-FUSE
 print("\n--- BORDAFUSE RESULTS ---\n")
-bordafuse = []
-for doc_id in range(0, elements):
-    sum = 0
-    for s in range(0, len(results)):
-        try:
-            doc, score, position = next((doc, score, position) for (
-                doc, score, position) in results[s] if doc == doc_id)
-            sum += elements - position
-        # When document not found (only for tops I guess)
-        except StopIteration:
-            sum += elements + 1
-    bordafuse.append((doc_id, imageLinks[doc_id], sum))
-print(sorted(bordafuse, key=lambda s: s[2], reverse=True))
+print(bordaFuse(search_results, elements))
 
 
 # Parse query news topics/segments
