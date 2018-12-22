@@ -2,6 +2,7 @@
 import numpy as np
 import random as rnd
 import nltk
+from nltk.corpus import stopwords 
 import time
 from numpy.random import shuffle
 from nltk.stem import WordNetLemmatizer
@@ -20,7 +21,9 @@ from tokenizer import tokenizer
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from keras.preprocessing import image
+from string import punctuation
 nltk.download('wordnet')
+nltk.download('stopwords')
 
 
 def center_crop_image(im, size=224):
@@ -174,6 +177,7 @@ def search_hog(data_features, image_id, n_elements):
 
 
 def tokenizer_bow(sentence, tknzr, lemmatize=False):
+    stop_words_punctuation = set(stopwords.words('english') + list(punctuation)) 
     wnl = WordNetLemmatizer()
     tokens = []
     if lemmatize:
@@ -181,7 +185,7 @@ def tokenizer_bow(sentence, tknzr, lemmatize=False):
             'a', 'n', 'v'] else wnl.lemmatize(i) for i, j in nltk.pos_tag(tknzr.tokenize(sentence))]
     else:
         tokens = tknzr.tokenize(sentence)
-    return tokens
+    return [token for token in tokens if not token in stop_words_punctuation]
 
 
 def bow_query(vectorizer, query):
