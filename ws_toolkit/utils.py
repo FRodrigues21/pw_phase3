@@ -412,7 +412,7 @@ def iteration_lb(data, targets, classes, iterations, p, features, weights, alpha
 
 def combSum(search_results, elements):
     combsum = []
-    for doc_id in range(0, elements):
+    for doc_id in range(0, 2000):
         sum = 0
         for s in range(0, len(search_results)):
             try:
@@ -430,7 +430,7 @@ def combSum(search_results, elements):
 
 def combMNZ(search_results, elements, top):
     combmnz = []
-    for doc_id in range(0, 2000):
+    for doc_id in range(0, elements):
         sum = 0
         cnt = 0
         for s in range(0, len(search_results)):
