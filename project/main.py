@@ -82,6 +82,34 @@ imageLinks = [i.replace('https://pbs.twimg.com/media/', '') for i in data[1]]
 targets = [list(map(int, c.replace(' ', '').split(","))) for c in data[2]]
 # Save cropped images in cache
 croppedImages = bundle_crop(croppedImages, imageLinks, 224)
+from datetime import datetime
+
+# Tell datetime the formatting of your dates.
+# For formatting check: https://docs.python.org/3.6/library/datetime.html#strftime-and-strptime-behavior
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+# Month of August = Festival (3 weeks)
+START_DATE = "2016-08-01"
+END_DATE = "2016-08-31"
+
+df_dates = df.copy()
+df_dates["created_at"] = df["created_at"].apply(lambda d: datetime.strptime(d, DATE_FORMAT).strftime("%Y-%m-%d"))
+range = (df_dates['created_at'] > START_DATE) & (df_dates['created_at'] <= END_DATE)
+df_dates = df_dates.loc[range]
+# Convert back to datetime for better date manipulation
+df_dates["created_at"] = df["created_at"].apply(lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S"))
+print(df_dates)
+
+# You can easily find the first/last date of your collections.
+min_date = df_dates["created_at"].min()
+max_date = df_dates["created_at"].max()
+num_days = (max_date-min_date).days
+print("Min date: {} - Max date: {} - Total days: {}".format(min_date, max_date, num_days))
+
+# You can also sort dates
+df_sorted = df_dates.sort_values(by="created_at", ascending=True)
+unique_dates = np.unique(df_sorted["created_at"].dt.strftime('%Y-%m-%d'))
+print(np.unique(df_dates["created_at"].dt.strftime('%Y-%m-%d')))
+print(len(unique_dates))
 
 #%%
 # Cache features
