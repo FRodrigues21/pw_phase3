@@ -50,7 +50,7 @@ def computeFeatures():
     bins = (4, 4, 4)
     hsv = True
 
-    _lemmatize = False
+    _lemmatize = True
     _mdf = 3
     _metric = "cosine"
     _k = 10
@@ -83,33 +83,32 @@ targets = [list(map(int, c.replace(' ', '').split(","))) for c in data[2]]
 # Save cropped images in cache
 croppedImages = bundle_crop(croppedImages, imageLinks, 224)
 
+#%%
 # Cache features
 computeFeatures()
 
-# Rank Fusion
-# %%
-elements = 2000
-results_bow = search_bow(X_BOW, X_BOW_VEC, "The Event Edinburgh Castle", elements)
-results_hoc = search_hoc(X_HOC, "760513155030220800.jpg", elements)
-results_hog = search_hog(X_HOG, "760513155030220800.jpg", elements)
-results_cnn = search_cnn(CNN_MODEL, CNN_MLB, CNN_TAGS,
-                         "760513155030220800.jpg", elements)
+#%%
+# RANK FUSION FROM QUERIES
+import json
 
-search_results = [results_bow, results_hoc, results_hog, results_cnn]
+with open("./edfest_2016_stories.json") as f:
+    data = json.load(f)
 
-# COMBSUM
-print("\n--- COMBSUM RESULTS ---\n")
-print(combSum(search_results, elements))
-
-# COMBMNZ
-print("\n--- COMBMNZ RESULTS ---\n")
-top = 5
-print(combMNZ(search_results, elements, top))
-
-# POSITION BASED
-# BORDA-FUSE
-print("\n--- BORDAFUSE RESULTS ---\n")
-print(bordaFuse(search_results, elements))
-
-
-# Parse query news topics/segments
+stories = data["stories"][:5]
+for story in stories:
+    print("\n=== STORY: {}===\n".format(story["story_title"]))
+    segments = story["segments"]
+    for seg in segments:
+        seg_id = seg["segment_id"]
+        seg_text = seg["text"]
+        seg_img = seg["image"]+".jpg"
+        print("SEGMENT #{} - Text: `{}` - Image: {}\n".format(seg_id, seg_text, seg_img))
+        elements = tweets.shape[0]
+        top = 50
+        results_bow = search_bow(X_BOW, X_BOW_VEC, seg_text, elements)
+        results_hoc = search_hoc(X_HOC, seg_img, elements)
+        results_hog = search_hog(X_HOG, seg_img, elements)
+        results_cnn = search_cnn(CNN_MODEL, CNN_MLB, CNN_TAGS, seg_img, elements)
+        search_results = [results_bow, results_hoc, results_hog, results_cnn]
+        print(rrf(search_results, elements, 60))
+        

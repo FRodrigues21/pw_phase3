@@ -112,22 +112,27 @@ def features_hoc(X_HOC, _croppedImages, _bins=(4, 4, 4), _hsv=True):
         X_HOC = np.array(X_HOC)
     return X_HOC
 
-def extract_features_hoc(_queryImageId, _bins=(4,4,4)):
+
+def extract_features_hoc(_queryImageId, _bins=(4, 4, 4)):
     img_q = imread("./query_images/" + _queryImageId)
     img_q_hsv = center_crop_image(img_q, size=224)
     img_q_hsv = color.rgb2hsv(img_q_hsv)
     img_int = img_as_ubyte(img_q_hsv)
     hist, bin_edges = hoc(img_int, bins=_bins)
     image_q_feat = np.squeeze(normalize(hist.reshape(1, -1), norm="l2"))
-    return image_q_feat.reshape(1,-1)
+    return image_q_feat.reshape(1, -1)
+
 
 def search_hoc(data_features, image_id, n_elements):
     query_features = extract_features_hoc(image_id)
-    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes, k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes))))
+    k_nearest_indexes, k_nearest_dists = k_neighbours(
+        q=query_features, X=data_features, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists,
+                       (i + 1 for i, t in enumerate(k_nearest_indexes))))
     return results
 
 # Histogram of Gradients
+
 
 def features_hog(X_HOG, images, pixels_per_cell=(32, 32), orientations=8):
     if X_HOG is None:
@@ -146,18 +151,23 @@ def features_hog(X_HOG, images, pixels_per_cell=(32, 32), orientations=8):
         X_HOG = np.array(X_HOG)
     return X_HOG
 
-def extract_features_hog(_queryImageId, _pixelsPerCell=(32,32), _orientations=8):
+
+def extract_features_hog(_queryImageId, _pixelsPerCell=(32, 32), _orientations=8):
     img_q = imread("./query_images/" + _queryImageId)
     img_q = center_crop_image(img_q, size=224)
     img_q = rgb2gray(img_q)
-    hist = hog(img_q, orientations=_orientations, pixels_per_cell=_pixelsPerCell)
+    hist = hog(img_q, orientations=_orientations,
+               pixels_per_cell=_pixelsPerCell)
     image_q_feat = np.squeeze(normalize(hist.reshape(1, -1), norm="l2"))
-    return image_q_feat.reshape(1,-1)
+    return image_q_feat.reshape(1, -1)
+
 
 def search_hog(data_features, image_id, n_elements):
     query_features = extract_features_hog(image_id)
-    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes, k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes))))
+    k_nearest_indexes, k_nearest_dists = k_neighbours(
+        q=query_features, X=data_features, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists,
+                       (i + 1 for i, t in enumerate(k_nearest_indexes))))
     return results
 
 # Bag of Words
@@ -168,15 +178,16 @@ def tokenizer_bow(sentence, tknzr, lemmatize=False):
     tokens = []
     if lemmatize:
         tokens = [wnl.lemmatize(i, j[0].lower()) if j[0].lower() in [
-            'a', 'n', 'v'] else wnl.lemmatize(i) for i, j in pos_tag(tknzr.tokenize(sentence))]
+            'a', 'n', 'v'] else wnl.lemmatize(i) for i, j in nltk.pos_tag(tknzr.tokenize(sentence))]
     else:
         tokens = tknzr.tokenize(sentence)
     return tokens
 
+
 def bow_query(vectorizer, query):
     # Transform query in a BoW representation
     query_bow = vectorizer.transform([query])
-    query_bow = normalize(query_bow, norm="l2")   
+    query_bow = normalize(query_bow, norm="l2")
     return query_bow
 
 
@@ -198,10 +209,13 @@ def features_bow(X_BOW, _dataTexts, _lemmatize=False, _mdf=3, _metric="cosine", 
             _dataTexts, {"tknzr": tknzr, "lemmatize": _lemmatize}, _mdf)
     return X_BOW, X_BOW_VEC
 
+
 def search_bow(texts_bow, texts_vec, query_text, n_elements=10):
     query_bow = bow_query(texts_vec, query_text)
-    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_bow, X=texts_bow, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes, k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes)) ))
+    k_nearest_indexes, k_nearest_dists = k_neighbours(
+        q=query_bow, X=texts_bow, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists,
+                       (i + 1 for i, t in enumerate(k_nearest_indexes))))
     return results
 
 # CNN - VGG 16
@@ -258,22 +272,26 @@ def features_cnn(X_CNN, CNN_PREDICTIONS, images_path, _dataImages):
     X_CNN = mlb.fit_transform(sorted_concepts)
     # print(tags_bow.shape)
     # model, concepts, mlb, tags_bow, predictions
-    return model, concepts, mlb, X_CNN, CNN_PREDICTIONS 
+    return model, concepts, mlb, X_CNN, CNN_PREDICTIONS
+
 
 def extract_features_cnn(_queryImageId, _model, _mlb, _k=10):
-    print("Query", _queryImageId)
     query_list = process_images_keras([_queryImageId], "./query_images/")
     query_array_list = np.vstack(query_list)
     pred_query = _model.predict(query_array_list)
-    query_sorted_concepts = np.argsort(pred_query, axis=1)[:,::-1][:,:_k]
+    query_sorted_concepts = np.argsort(pred_query, axis=1)[:, ::-1][:, :_k]
     query_bow = _mlb.transform(query_sorted_concepts)
     query_tags = decode_predictions(pred_query, top=5)
     return query_bow, query_tags
 
+
 def search_cnn(data_model, data_mlb, data_features, image_id, n_elements=10):
-    query_features, query_tags = extract_features_cnn(image_id, data_model, data_mlb)
-    k_nearest_indexes, k_nearest_dists = k_neighbours(q=query_features, X=data_features, metric="cosine", k=n_elements)
-    results = list(zip(k_nearest_indexes,k_nearest_dists, (i+1 for i,t in enumerate(k_nearest_indexes)) ))
+    query_features, query_tags = extract_features_cnn(
+        image_id, data_model, data_mlb)
+    k_nearest_indexes, k_nearest_dists = k_neighbours(
+        q=query_features, X=data_features, metric="cosine", k=n_elements)
+    results = list(zip(k_nearest_indexes, k_nearest_dists,
+                       (i + 1 for i, t in enumerate(k_nearest_indexes))))
     return results
 
 
@@ -333,6 +351,7 @@ def label_propagation(mlb, images, y, y_true, features, weights, selection, topk
         Y = mlb.transform(T)
     return Y
 
+
 def iteration_lb(data, targets, classes, iterations, p, features, weights, alpha, selection, topk, threshold):
     # Choose a random number between 1 and 100 to shuffle to prevent biased
     # results
@@ -359,7 +378,7 @@ def iteration_lb(data, targets, classes, iterations, p, features, weights, alpha
 
     print(" ")
     print("Iteration: {} - Total data labeled: {} - Total data unlabeled: {}".format(iterations,
-                                                                                         len(indices_labeled), len(indices_unlabeled)))
+                                                                                     len(indices_labeled), len(indices_unlabeled)))
 
     # Convert labels to a one-hot-encoded vector
     mlb = MultiLabelBinarizer(classes=classes)
@@ -385,6 +404,8 @@ def iteration_lb(data, targets, classes, iterations, p, features, weights, alpha
 # Rank Fusion
 
 # CombSUM
+
+
 def combSum(search_results, elements):
     combsum = []
     for doc_id in range(0, elements):
@@ -397,29 +418,33 @@ def combSum(search_results, elements):
             # When document not found (only for tops I guess)
             except StopIteration:
                 sum += 0
-        combsum.append((doc_id, imageLinks[doc_id], sum))
-    return sorted(combsum, key=lambda s: s[2])
+        combsum.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
+    return sorted(combsum, key=lambda s: s[3])
 
 # CombMNZ
+
+
 def combMNZ(search_results, elements, top):
     combmnz = []
     for doc_id in range(0, 2000):
         sum = 0
         cnt = 0
-        for s in range(0, len(results)):
+        for s in range(0, len(search_results)):
             try:
                 doc, score, position = next((doc, score, position) for (
-                    doc, score, position) in results[s] if doc == doc_id)
+                    doc, score, position) in search_results[s] if doc == doc_id)
                 sum += score
                 if position <= top:
                     cnt += 1
             # When document not found (only for tops I guess)
             except StopIteration:
                 sum += 0
-        combmnz.append((doc_id, imageLinks[doc_id], cnt * sum))
-    return sorted(combmnz, key=lambda s: s[2], reverse=True)
+        combmnz.append((doc_id, tweets[doc_id], imageLinks[doc_id], cnt * sum))
+    return sorted(combmnz, key=lambda s: s[3], reverse=True)
 
 # Borda Fuse
+
+
 def bordaFuse(search_results, elements):
     bordafuse = []
     for doc_id in range(0, elements):
@@ -432,11 +457,22 @@ def bordaFuse(search_results, elements):
             # When document not found (only for tops I guess)
             except StopIteration:
                 sum += elements + 1
-        bordafuse.append((doc_id, imageLinks[doc_id], sum))
-    return sorted(bordafuse, key=lambda s: s[2], reverse=True)
+        bordafuse.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
+    return sorted(bordafuse, key=lambda s: s[3], reverse=True)
 
 
-
-
-
-
+def rrf(search_results, elements, k):
+    rrf = []
+    k = k
+    for doc_id in range(0, elements):
+        sum = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += 1 / (k + position)
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += 1 / (k + elements + 1)
+        rrf.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
+    return sorted(rrf, key=lambda s: s[3], reverse=True)
