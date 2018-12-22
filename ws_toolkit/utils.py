@@ -2,7 +2,7 @@
 import numpy as np
 import random as rnd
 import nltk
-from nltk.corpus import stopwords 
+from nltk.corpus import stopwords
 import time
 from numpy.random import shuffle
 from nltk.stem import WordNetLemmatizer
@@ -177,7 +177,8 @@ def search_hog(data_features, image_id, n_elements):
 
 
 def tokenizer_bow(sentence, tknzr, lemmatize=False):
-    stop_words_punctuation = set(stopwords.words('english') + list(punctuation)) 
+    stop_words_punctuation = set(
+        stopwords.words('english') + list(punctuation))
     wnl = WordNetLemmatizer()
     tokens = []
     if lemmatize:
@@ -480,3 +481,80 @@ def rrf(search_results, elements, k):
                 sum += 1 / (k + elements + 1)
         rrf.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
     return sorted(rrf, key=lambda s: s[3], reverse=True)
+
+# Rank Fusion with only a set of documents, documents of relevant days, of the total data set (relevant documents for top k days and a query text)
+# Not very good yes, we tried :)
+
+
+def rrf_relevant(search_results, elements, total, k):
+    rrf = []
+    k = k
+    for doc_id in elements:
+        sum = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += 1 / (k + (position * len(elements) / total))
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += 1 / (k + len(elements) + 1)
+        rrf.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
+    return sorted(rrf, key=lambda s: s[3], reverse=True)
+
+# Borda Fuse
+
+
+def bordaFuse_relevant(search_results, elements, total):
+    bordafuse = []
+    for doc_id in elements:
+        sum = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += len(elements) - (position * len(elements) / total)
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += len(elements) + 1
+        bordafuse.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
+    return sorted(bordafuse, key=lambda s: s[3], reverse=True)
+
+# CombSUM
+
+
+def combSum_relevant(search_results, elements):
+    combsum = []
+    for doc_id in elements:
+        sum = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += score
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += 0
+        combsum.append((doc_id, tweets[doc_id], imageLinks[doc_id], sum))
+    return sorted(combsum, key=lambda s: s[3])
+
+# CombMNZ
+
+
+def combMNZ_relevant(search_results, elements, top):
+    combmnz = []
+    for doc_id in elements:
+        sum = 0
+        cnt = 0
+        for s in range(0, len(search_results)):
+            try:
+                doc, score, position = next((doc, score, position) for (
+                    doc, score, position) in search_results[s] if doc == doc_id)
+                sum += score
+                if position <= top:
+                    cnt += 1
+            # When document not found (only for tops I guess)
+            except StopIteration:
+                sum += 0
+        combmnz.append((doc_id, tweets[doc_id], imageLinks[doc_id], cnt * sum))
+    return sorted(combmnz, key=lambda s: s[3], reverse=True)
